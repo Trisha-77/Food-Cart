@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Checkout - Food Cart</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+
+    .checkout-container {
+      width: 90%;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background-color: white;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .order-summary, .payment-details {
+      margin-bottom: 30px;
+    }
+
+    .order-summary ul {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .order-summary li {
+      padding: 12px 0;
+      border-bottom: 1px solid #f0f0f0;
+      font-size: 18px;
+      color: #555;
+    }
+
+    .order-summary li:last-child {
+      border-bottom: none;
+    }
+
+    .total-price {
+      font-weight: bold;
+      font-size: 22px;
+      color: #ff6600;
+    }
+
+    .payment-details {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .payment-details label {
+      font-size: 18px;
+      color: #555;
+    }
+
+    .payment-method select {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      transition: 0.3s;
+    }
+
+    .payment-method select:hover, .payment-method select:focus {
+      border-color: #ff6600;
+      background-color: #fff;
+    }
+
+    .confirm-btn {
+      background-color: #ff6600;
+      color: white;
+      border: none;
+      padding: 15px;
+      width: 100%;
+      font-size: 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .confirm-btn:hover {
+      background-color: #e55c00;
+    }
+
+    .confirm-btn:active {
+      background-color: #cc5200;
+    }
+
+    .footer-text {
+      text-align: center;
+      font-size: 14px;
+      color: #888;
+      margin-top: 40px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="checkout-container">
+    <h1>Order Summary</h1>
+
+    <div class="order-summary">
+      <ul id="order-summary-list"></ul>
+      <p class="total-price">Total: $<span id="total-price">0.00</span></p>
+    </div>
+
+    <!-- Payment Details Section -->
+    <div class="payment-details">
+      <label for="payment-method">Select Payment Method</label>
+      <select id="payment-method" class="payment-method">
+        <option value="credit-card">Credit Card</option>
+        <option value="paypal">PayPal</option>
+        <option value="bank-transfer">Bank Transfer</option>
+      </select>
+    </div>
+
+    <!-- Confirm Payment Button -->
+    <button class="confirm-btn" id="confirm-payment">Confirm Payment</button>
+  </div>
+
+  <p class="footer-text">&copy; 2025 Food Cart. All rights reserved.</p>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const orderSummaryList = document.getElementById("order-summary-list");
+      const totalPriceEl = document.getElementById("total-price");
+      const paymentMethodEl = document.getElementById("payment-method");
+
+      let total = 0;
+
+      // Render cart items in the order summary
+      cart.forEach(item => {
+        total += item.price * item.quantity;
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `${item.name} x ${item.quantity} - $${(item.price * item.quantity).toFixed(2)}`;
+        orderSummaryList.appendChild(listItem);
+      });
+
+      // Display total price
+      totalPriceEl.textContent = total.toFixed(2);
+
+      // Handle Confirm Payment
+      const confirmPaymentButton = document.getElementById("confirm-payment");
+      confirmPaymentButton.addEventListener("click", () => {
+        const paymentMethod = paymentMethodEl.value;
+        alert(`Payment method: ${paymentMethod} - Total: $${total.toFixed(2)}\nThank you for your order!`);
+        
+        // Optionally clear the cart after payment
+        localStorage.removeItem('cart');
+      });
+    });
+  </script>
+</body>
+</html>

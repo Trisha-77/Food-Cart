@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Food Cart</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f9f9f9;
+    }
+  nav {
+  background-color: #ff6600;
+  color: white;
+  padding: 15px 20px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 60px;
+}
+.nav-title {
+  font-size: 24px;
+  font-weight: bold;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.nav-right {
+  position: absolute;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  font-size: 16px;
+}
+.nav-right a {
+  color: white;
+  text-decoration: none;
+}
+.nav-right img {
+  width: 28px;
+  cursor: pointer;
+}
+.cart-icon {
+      width: 28px;
+      position: absolute;
+      right: 20px;
+      top: 15px;
+      cursor: pointer;
+    }
+    .search-filter {
+      text-align: center;
+      margin: 20px;
+    }
+    .search-filter input {
+      width: 300px;
+      padding: 10px;
+      font-size: 16px;
+    }
+    .food-menu {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    .food-item {
+      background-color: white;
+      border-radius: 10px;
+      padding: 15px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      width: 220px;
+      text-align: center;
+    }
+    .food-img {
+      width: 100%;
+      border-radius: 10px;
+    }
+    .add-to-cart-btn {
+      background-color: #ff6600;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin-top: 10px;
+      cursor: pointer;
+      width: 100%;
+      border-radius: 5px;
+    }
+ .cart-sidebar {
+  position: fixed;
+  right: -100%;
+  top: 0;
+  width: 300px;
+  height: 100%;
+  background: #fff;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+  padding: 20px;
+  transition: right 0.3s ease;
+  z-index: 999;
+}
+.cart-sidebar.open {
+  right: 0;
+}
+.cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cart-header img {
+      cursor: pointer;
+    }
+  .cart-sidebar ul {
+      list-style-type: none;
+      padding: 0;
+    }
+  .remove-item {
+      background: none;
+      border: none;
+      color: red;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+  .checkout-btn, .clear-cart {
+      background-color: #ff6600;
+      color: white;
+      border: none;
+      padding: 10px;
+      margin-top: 10px;
+      width: 100%;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+</style>
+</head>
+<body>
+  <nav>
+    <div class="nav-title">Food Cart</div>
+    <div class="nav-right">
+      <a href="login.html">Login</a>
+      <a href="signup.html">Sign Up</a>
+      <img src="https://img.icons8.com/ios/50/ffffff/shopping-cart.png" alt="Cart" id="cart-icon" />
+    </div>
+  </nav>  
+  <div class="search-filter">
+    <input type="text" id="search" placeholder="Search food items..." />
+  </div>
+
+  <div class="food-menu" id="food-menu"></div>
+
+  <div class="cart-sidebar" id="cart-sidebar">
+    <div class="cart-header">
+      <h2>Cart</h2>
+      <img src="https://img.icons8.com/ios-glyphs/30/000000/multiply.png" id="close-cart" />
+    </div>
+    <ul id="cart-items"></ul>
+    <h3>Total: $<span id="total-price">0.00</span></h3>
+    <!-- Checkout button wrapped in anchor tag -->
+<a href="checkout.html">
+  <button class="checkout-btn">Checkout</button>
+</a>
+    <button class="clear-cart">Clear Cart</button>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const API_URL = "https://www.themealdb.com/api/json/v1/1/search.php?s=";
+      const foodMenu = document.getElementById("food-menu");
+      const cartItemsEl = document.getElementById("cart-items");
+      const totalPriceEl = document.getElementById("total-price");
+      const searchInput = document.getElementById("search");
+      const cartSidebar = document.getElementById("cart-sidebar");
+      const closeCartBtn = document.getElementById("close-cart");
+    
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      let foodItems = [];
+    
+      function updateCart() {
+        cartItemsEl.innerHTML = "";
+        let total = 0;
+        cart.forEach((item, i) => {
+          total += item.price * item.quantity;
+          const li = document.createElement("li");
+          li.innerHTML = `
+            ${item.name} x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}
+            <button class="remove-item" onclick="removeFromCart(${i})">x</button>
+          `;
+          cartItemsEl.appendChild(li);
+        });
+        totalPriceEl.textContent = total.toFixed(2);
+        localStorage.setItem('cart', JSON.stringify(cart));
+      }
+    
+      window.removeFromCart = function(index) {
+        cart.splice(index, 1);
+        updateCart();
+      }
+    
+      window.addToCart = function(index) {
+        const item = foodItems[index];
+        const existing = cart.find(i => i.id === item.id);
+        if (existing) {
+          existing.quantity++;
+        } else {
+          cart.push({ ...item, quantity: 1 });
+        }
+        updateCart();
+      }
+    
+      async function fetchFoodItems() {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+        if (!data.meals) return;
+    
+        foodItems = data.meals.slice(0, 12).map((meal, idx) => {
+          const ingredients = [];
+          for (let i = 1; i <= 6; i++) {
+            if (meal[`strIngredient${i}`]) {
+              ingredients.push(meal[`strMeasure${i}`] + " " + meal[`strIngredient${i}`]);
+            }
+          }
+          return {
+            id: meal.idMeal,
+            name: meal.strMeal,
+            img: meal.strMealThumb,
+            price: +(Math.random() * 10 + 5).toFixed(2),
+            description: meal.strInstructions.slice(0, 100) + "...",
+            ingredients,
+          };
+        });
+    
+        localStorage.setItem('foodItems', JSON.stringify(foodItems));
+        displayItems(foodItems);
+      }
+    
+      function displayItems(items) {
+        foodMenu.innerHTML = "";
+        items.forEach((item, index) => {
+          const div = document.createElement("div");
+          div.className = "food-item";
+          div.innerHTML = `
+            <a href="item-detail.html?id=${index}">
+              <img src="${item.img}" class="food-img" />
+            </a>
+            <p><strong>${item.name}</strong></p>
+            <p>$${item.price}</p>
+            <button class="add-to-cart-btn" onclick="addToCart(${index})">Add to Cart</button>
+          `;
+          foodMenu.appendChild(div);
+        });
+      }
+    
+      searchInput.addEventListener("input", () => {
+        const term = searchInput.value.toLowerCase();
+        const filtered = foodItems.filter(f => f.name.toLowerCase().includes(term));
+        displayItems(filtered);
+      });
+    
+      document.querySelector(".clear-cart").onclick = () => {
+        cart = [];
+        updateCart();
+      };
+      document.querySelector(".checkout-btn").onclick = () => {
+  if (cart.length === 0) return alert("Cart is empty!");
+
+  const modal = document.getElementById("order-summary-modal");
+  const summaryList = document.getElementById("summary-items");
+  const summaryTotal = document.getElementById("summary-total");
+
+  summaryList.innerHTML = "";
+  let total = 0;
+
+  cart.forEach(item => {
+    const li = document.createElement("li");
+    li.textContent = `${item.name} x${item.quantity} - $${(item.price * item.quantity).toFixed(2)}`;
+    summaryList.appendChild(li);
+    total += item.price * item.quantity;
+  });
+
+  summaryTotal.textContent = total.toFixed(2);
+  modal.style.display = "flex"; // This is crucial
+};
+      document.getElementById("cart-icon").onclick = () => {
+        cartSidebar.classList.add("open");
+      };
+    
+      closeCartBtn.onclick = () => {
+        cartSidebar.classList.remove("open");
+      };
+    
+      fetchFoodItems();
+      updateCart();
+    });
+</script>
+</body>
+</html>
